@@ -1,0 +1,67 @@
+Pseudo code Server
+START main function
+CALL system function with argument "Title 'H.A.A Server(Hospital Administrative
+Assistant)'"
+CALL system function with argument "color B0"
+DECLARE msg as array of characters with size 30
+DECLARE wsa as WSADATA
+DECLARE listen_socket, client_socket as SOCKET
+DECLARE server, client as sockaddr_in
+DECLARE c, recv_size as integers
+DECLARE client_message as array of characters with size 2000
+
+PRINT "Initialising Winsock..."
+IF WSAStartup(MAKEWORD(2, 2), &wsa) is not equal to 0 THEN
+PRINT "WSAStartup failed. Error code: " + WSAGetLastError()
+RETURN 1
+END IF
+PRINT "Winsock initialised."
+
+IF (listen_socket = socket(AF_INET, SOCK_STREAM, 0)) is equal to INVALID_SOCKET
+THEN
+PRINT "Could not create socket. Error code: " + WSAGetLastError()
+RETURN 1
+END IF
+PRINT "Socket created."
+
+SET server.sin_family to AF_INET
+SET server.sin_addr.s_addr to INADDR_ANY
+SET server.sin_port to htons(PORT)
+
+IF bind(listen_socket, (struct sockaddr *)&server, sizeof(server)) is equal to
+SOCKET_ERROR THEN
+PRINT "Bind failed. Error code: " + WSAGetLastError()
+RETURN 1
+END IF
+PRINT "Bind done."
+
+CALL listen function with arguments listen_socket and 3
+PRINT "Waiting for incoming connections..."
+
+SET c to sizeof(struct sockaddr_in)
+IF (client_socket = accept(listen_socket, (struct sockaddr *)&client, &c)) is equal to
+INVALID_SOCKET THEN
+PRINT "Connection failed. Error code: " + WSAGetLastError()
+RETURN 1
+END IF
+PRINT "Connection accepted."
+
+CALL system function with argument "pause"
+CALL system function with argument "Cls"
+
+PRINT "Selamat datang di server pusat"
+PRINT "Server pusat berperan sebagai database dan hanya bersifat satu arah"
+PRINT "Menunggu respon........"
+
+IF (recv_size = recv(client_socket, client_message, 2000, 0)) is greater than 0 THEN
+SET client_message[recv_size] to '\0'
+PRINT "Laporan diterima"
+PRINT "pesan dari client : " + client_message
+END IF
+
+CALL closesocket function with argument client_socket
+CALL closesocket function with argument listen_socket
+CALL WSACleanup function
+
+RETURN 0
+END main function
