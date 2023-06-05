@@ -1,0 +1,241 @@
+Pseudo code Client
+START main function
+CALL system function with argument "color B0"
+DECLARE msg as array of characters with size 30
+DECLARE wsa as WSADATA
+DECLARE client_socket as SOCKET
+DECLARE server as sockaddr_in
+DECLARE message, server_reply as arrays of characters with size 2000
+DECLARE recv_size as integer
+
+PRINT "Initialising Winsock..."
+IF WSAStartup(MAKEWORD(2, 2), &wsa) is not equal to 0 THEN
+PRINT "WSAStartup failed. Error code: " + WSAGetLastError()
+RETURN 1
+END IF
+PRINT "Winsock initialised."
+
+IF (client_socket = socket(AF_INET, SOCK_STREAM, 0)) is equal to INVALID_SOCKET
+THEN
+PRINT "Could not create socket. Error code: " + WSAGetLastError()
+RETURN 1
+END IF
+PRINT "Socket created."
+
+SET server.sin_addr.s_addr to inet_addr(SERVER)
+
+SET server.sin_family to AF_INET
+SET server.sin_port to htons(PORT)
+
+IF connect(client_socket, (struct sockaddr *)&server, sizeof(server)) is less than 0 THEN
+PRINT "Connection failed. Error code: " + WSAGetLastError()
+RETURN 1
+END IF
+PRINT "Connected to server."
+
+CALL system function with argument "Title 'H.A.A Client(Hospital Administrative
+Assistant)'"
+CALL system function with argument "pause"
+CALL system function with argument "cls"
+
+DECLARE input, dis as integers
+DECLARE arr as array of pointers to struct node with size 100
+DECLARE jum as integer
+DECLARE q as struct queue
+q.head = q.ujung = NULL
+DECLARE ptr as file pointer
+ptr = fopen("Report.txt", "w")
+fprintf(ptr, "==================Waiting list==================\n")
+fclose(ptr)
+PRINT "Selamat Datang Di H.A.A (Hospital Administrative Assistant)!"
+CALL system function with argument "timeout /t 3 /nobreak > NUL"
+
+CALL system function with argument "cls"
+
+WHILE input is not equal to 4 DO
+PRINT "======================================"
+PRINT "| |"
+PRINT "| Data pengunjung klinik |"
+PRINT "| |"
+PRINT "======================================"
+PRINT "======================================"
+PRINT "| Menu Utama: |"
+PRINT "| |"
+PRINT "| 1. Pendaftaran Pasien |"
+PRINT "| 2. Pemanggilan Pasien |"
+PRINT "| 3. Waiting list |"
+PRINT "| 4. Tutup Klinik |"
+PRINT "======================================"
+PRINT "Pilihlah opsi yang ingin dijalankan: "
+READ input
+
+IF input is equal to 1 THEN
+CALL system function with argument "cls"
+CALL enqueue function with arguments &q, arr, &jum
+CALL system function with argument "pause"
+CALL system function with argument "cls"
+
+ELSE IF input is equal to 2 THEN
+CALL system function with argument "cls"
+CALL dequeue function with argument &q
+CALL system function with argument "pause"
+CALL system function with argument "cls"
+ELSE IF input is equal to 3 THEN
+CALL system function with argument "cls"
+PRINT "1. Waktu input"
+PRINT "2. Abjad"
+PRINT "data ingin ditampilkan secara : "
+READ dis
+IF dis is equal to 1 THEN
+CALL system function with argument "cls"
+CALL display function with argument &q
+PRINT ""
+ELSE IF dis is equal to 2 THEN
+CALL system function with argument "cls"
+CALL abjad function with arguments arr, jum
+ELSE
+PRINT "Pilihan salah"
+END IF
+CALL system function with argument "pause"
+CALL system function with argument "cls"
+ELSE IF input is equal to 4 THEN
+
+BREAK
+ELSE
+PRINT "Pilihan salah, harap pilih kembali"
+CALL system function with argument "pause"
+CALL system function with argument "cls"
+END IF
+END WHILE
+
+CALL system function with argument "cls"
+DECLARE pil as integer
+PRINT "1. Iya"
+PRINT "2. Tidak"
+PRINT "Apakah anda mau meninggalkan pesan/catatan ke server? : "
+READ pil
+ptr = fopen("Report.txt", "a")
+IF ptr is equal to NULL THEN
+PRINT "Terjadi masalah pada file"
+RETURN 1
+END IF
+
+IF pil is equal to 1 THEN
+DECLARE msg as array of characters with size 100
+PRINT "Masukan catatan/pesan ke server: "
+READ msg
+
+SET pesan to msg
+PRINT "Mengirim laporan ke server........."
+CALL send function with arguments client_socket, pesan, strlen(pesan), 0
+ELSE IF pil is equal to 2 THEN
+DECLARE msg as array of characters with size 100
+SET msg to "Shift hari ini telah selesai\n"
+SET pesan to msg
+PRINT "Mengirim laporan ke server........."
+CALL send function with arguments client_socket, pesan, strlen(pesan), 0
+END IF
+
+CALL closesocket function with argument client_socket
+CALL WSACleanup function
+CALL system function with argument "pause"
+CALL system function with argument "cls"
+fclose(ptr)
+PRINT "Laporan berhasil dikirim"
+PRINT "Terima kasih telah menggunakan aplikasi kami"
+RETURN 0
+END main function
+
+FUNCTION enqueue(q: pointer to struct queue, arr: array of pointers to struct node, jum:
+pointer to integer)
+DECLARE temp as pointer to struct node
+ALLOCATE memory for temp as struct node
+
+PRINT "Masukkan Nama pasien: "
+READ temp->nama
+PRINT "Diagnosa: "
+READ temp->penyakit
+SET temp->nama[strcspn(temp->nama, "\n")] to '\0'
+SET temp->penyakit[strcspn(temp->penyakit, "\n")] to '\0'
+SET temp->next to NULL
+
+IF q->ujung is equal to NULL THEN
+SET q->head to temp
+SET q->ujung to temp
+ELSE
+SET q->ujung->next to temp
+SET q->ujung to temp
+END IF
+
+DECLARE ptr as file pointer
+ptr = fopen("Report.txt", "a")
+IF ptr is equal to NULL THEN
+PRINT "Terjadi masalah pada file"
+RETURN
+END IF
+fprintf(ptr, "Nama Pasien: %s\nDiagnosa: %s\n\n", temp->nama, temp->penyakit)
+fclose(ptr)
+
+SET arr[*jum] to temp
+INCREMENT jum
+END FUNCTION
+
+FUNCTION dequeue(q: pointer to struct queue)
+IF q->head is equal to NULL THEN
+PRINT "Tidak ada data pasien yang dimasukkan"
+RETURN
+END IF
+
+PRINT "Pasien dengan nama '%s' telah memasuki ruangan dan dihapus dari waiting list\n",
+q->head->nama
+DECLARE temp as pointer to struct node
+SET temp to q->head
+SET q->head to q->head->next
+
+IF q->head is equal to NULL THEN
+SET q->ujung to NULL
+END IF
+
+FREE memory pointed by temp
+END FUNCTION
+
+FUNCTION display(q: pointer to struct queue)
+
+IF q->head is equal to NULL THEN
+PRINT "Data masih kosong! Silahkan mendaftarkan diri terlebih dahulu."
+RETURN
+END IF
+
+PRINT "==================Waiting list=================="
+DECLARE temp as pointer to struct node
+SET temp to q->head
+WHILE temp is not equal to NULL DO
+PRINT "Nama Pasien: %s\nDiagnosa: %s\n\n", temp->nama, temp->penyakit
+SET temp to temp->next
+END WHILE
+END FUNCTION
+
+FUNCTION abjad(arr: array of pointers to struct node, jum: integer)
+DECLARE i, j as integer
+IF jum is equal to 0 THEN
+PRINT "Data masih kosong! Silahkan mendaftarkan diri terlebih dahulu."
+RETURN
+END IF
+
+FOR i = 0 TO jum - 1 DO
+FOR j = 0 TO jum - i - 1 DO
+IF strcmp(arr[j]->nama, arr[j + 1]->nama) > 0 THEN
+
+DECLARE temp as pointer to struct node
+SET temp to arr[j]
+SET arr[j] to arr[j + 1]
+SET arr[j + 1] to temp
+END IF
+END FOR
+END FOR
+
+PRINT "==================Waiting list==================\n"
+FOR i = 0 TO jum DO
+PRINT "Nama Pasien: %s\nDiagnosa: %s\n\n", arr[i]->nama, arr[i]->penyakit
+END FOR
+END FUNCTION
